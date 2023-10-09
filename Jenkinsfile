@@ -30,7 +30,7 @@ post{
             sh 'docker run --name mypycont -d -p 3000:5000 my-flask'
             mail to: "jkapse51@gmail.com",
             subject: "Notification mail from jenkins",
-            body: "build successfull"
+            body: "build triggred success"
         }
 }
 
