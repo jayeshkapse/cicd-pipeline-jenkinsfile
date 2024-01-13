@@ -1,41 +1,40 @@
 pipeline {
-  agent any
-
-  stages {
-    stage('Build') {
-      steps {
-        sh 'docker build -t my-flask .'
-        sh 'docker tag my-flask $DOCKER_BFLASK_IMAGE'
-      }
-    }
-    stage('Test') {
-      steps {
-        sh 'docker run my-flask python -m pytest app/tests/'
-      }
-    }
-    stage('Deploy') {
-      steps {
-        withCredentials([usernamePassword(credentialsId: "${DOCKER_REGISTRY_CREDS}", passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-          sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin docker.io"
-          sh 'docker push $DOCKER_BFLASK_IMAGE'
+    agent {
+        docker {
+            image 'python:3.9-alpine'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'  // For Docker-in-Docker builds
         }
-      }
     }
-    
-  }
 
-post{
-      always{
-            sh 'docker rm -f mypycont'
-            sh 'docker run --name mypycont -d -p 3000:5000 my-flask'
-            mail to: "jkapse51@gmail.com",
-            subject: "Notification mail from jenkins",
-            body: "build triggred success"
+    stages {
+        stage('Build') {
+            steps {
+                sh 'pip install -r requirements.txt'
+            }
         }
+
+        stage('Test') {
+            steps {
+                sh 'pytest app/tests/'
+            }
+            post {
+                always {
+                    junit 'app/tests/junit_report.xml'  // Assuming JUnit-style test reports
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                // Replace with your deployment steps, e.g., using Docker plugins
+                sh 'docker build -t my-python-app .'
+                sh 'docker run -p 5000:5000 my-python-app'
+            }
+            post {
+                failure {
+                    sh 'docker rm -f my-python-app'  // Rollback logic for Docker containers
+                }
+            }
+        }
+    }
 }
-
-}
-    
-
-  
-
