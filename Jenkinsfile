@@ -15,7 +15,7 @@ pipeline {
             steps {
                 cleanWs()
                 script {
-                    checkout([$class: 'GitSCM', branches: [[name: 'main']], userRemoteConfigs: [[url: 'https://github.com/Shrirang-joshi17198/sample-app.git']]])
+                    checkout([$class: 'GitSCM', branches: [[name: 'main']], userRemoteConfigs: [[url: 'https://github.com/jayeshkapse/cicd-pipeline-jenkinsfile.git']]])
                 }
             }
         }
