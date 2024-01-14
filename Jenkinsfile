@@ -26,7 +26,7 @@ pipeline {
                 script {
                     docker.image('python:3.9-alpine').inside('-v $PWD:/app') {
                         sh 'pip install -r /app/requirements.txt'
-                        sh 'pytest /app/app/tests/'
+                        sh 'pytest /app/app/tests/ --junitxml=app/tests/junit_report.xml'
                     }
                 }
             }
