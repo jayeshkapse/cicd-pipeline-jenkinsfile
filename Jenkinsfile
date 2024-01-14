@@ -21,13 +21,12 @@ pipeline {
         }
 
         stage('Build and Test') {
-            agent any
             steps {
                 script {
-                    docker.image('python:3.9-alpine').inside('-v $PWD:/app') {
-                        sh 'pip install -r /app/requirements.txt'
-                        sh 'pytest /app/app/tests/ --junitxml=/app/app/tests/junit_report.xml'
-                    }
+                    // Use the same Docker agent as defined globally
+                    sh 'pwd'  // Print working directory for verification
+                    sh 'pip install -r requirements.txt'
+                    sh 'pytest app/tests/ --junitxml=app/tests/junit_report.xml'
                 }
             }
             post {
@@ -37,30 +36,11 @@ pipeline {
             }
         }
 
-        stage('Check Workspace') {
-            steps {
-                script {
-                    sh 'ls -R'
-                }
-            }
-        }
-
-        stage('Check Permissions') {
-            steps {
-                script {
-                    sh 'ls -l app/tests'
-                }
-            }
-        }
-
         stage('Deploy') {
-            agent any
             steps {
                 script {
-                    docker.image('python:3.9-alpine').inside('-v $PWD:/app') {
-                        sh 'docker build -t my-python-app .'
-                        sh 'docker run -p 5000:5000 my-python-app'
-                    }
+                    sh 'docker build -t my-python-app .'
+                    sh 'docker run -p 5000:5000 my-python-app'
                 }
             }
             post {
