@@ -26,13 +26,29 @@ pipeline {
                 script {
                     docker.image('python:3.9-alpine').inside('-v $PWD:/app') {
                         sh 'pip install -r /app/requirements.txt'
-                        sh 'pytest /app/app/tests/ --junitxml=app/tests/junit_report.xml'
+                        sh 'pytest /app/app/tests/ --junitxml=/app/app/tests/junit_report.xml'
                     }
                 }
             }
             post {
                 always {
                     junit 'app/tests/junit_report.xml'
+                }
+            }
+        }
+
+        stage('Check Workspace') {
+            steps {
+                script {
+                    sh 'ls -R'
+                }
+            }
+        }
+
+        stage('Check Permissions') {
+            steps {
+                script {
+                    sh 'ls -l app/tests'
                 }
             }
         }
